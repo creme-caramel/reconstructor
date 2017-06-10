@@ -1,12 +1,17 @@
 #include "db/db.h"
-#include "sql/query.h"
+#include "inputfile.h"
 #include "grpinfo.h"
 #include <stdint.h>
 #include <string>
 #include <iostream>
 #include <map>
 #include <cassert>
+#include <boost/algorithm/string/predicate.hpp>
 using namespace std;
+using namespace boost::algorithm;
+
+#define QFILE "sql/queries"
+#define END_OF_SMPL "EOS"
 
 int main(int argc, char **argv) {
 	if(argc != 3) {
@@ -16,50 +21,67 @@ int main(int argc, char **argv) {
 
 	enum { UBERCON, LANEMID };
 	Db db(argv[1]);
-	Query q("sql/queries");
+	InputFile q(QFILE);
+	InputFile mut(argv[2]);
 	stringstream readdb;
-	string cmd;
-	uint8_t numsamples; // for testing
+	string line;
+	size_t numsamples;
 
-	map<uint8_t, string> uberconlist;
-	map<uint8_t, pair<uint8_t, uint8_t> > lanemidlist;
+	map<uint8_t, string> uberconmap;
+	map<uint8_t, pair<uint8_t, uint8_t> > lanemidmap;
+	typedef map<uint64_t, GrpInfo*> Grpmap; // 48 bytes each
 
 	/*
 	 * Store uber consensus of each sample
 	 */
 
-	q.getquery(cmd);
+	q.getln(line);
 	string id, ubr;
-	if(db.retrieve(cmd, readdb, UBERCON) != 0)
+	if(db.retrieve(line, readdb, UBERCON) != 0)
 		cout << "db error" << endl;
 	while(readdb >> id && readdb >> ubr) {
 		uint8_t idnum = stoi(id);
-		uberconlist.insert(make_pair(idnum, ubr));
+		uberconmap.insert(make_pair(idnum, ubr));
 	}
 	readdb.clear();
+	numsamples = uberconmap.size();
 
-	numsamples = uberconlist.size();
-	cout << (int)numsamples << endl;
-	cout << uberconlist.at(22) << endl;
+	cout << numsamples << endl;
+	cout << uberconmap.at(22) << endl;
 
 	/*
 	 * Identify each sample with lane/mid nums
 	 */
 
-	q.getquery(cmd);
-	if(db.retrieve(cmd, readdb, LANEMID) != 0)
+	q.getln(line);
+	if(db.retrieve(line, readdb, LANEMID) != 0)
 		cout << "db error" << endl;
 	string lane, mid;
 	while(readdb >> id && readdb >> lane && readdb >> mid) {
 		uint8_t idnum = stoi(id);
 		uint8_t lanenum = stoi(lane);
 		uint8_t midnum = stoi(mid);
-		lanemidlist.insert(make_pair(idnum, make_pair(lanenum, midnum)));
+		lanemidmap.insert(make_pair(idnum, make_pair(lanenum, midnum)));
 	}
 	readdb.clear();
+	assert(numsamples == lanemidmap.size());
 
-	assert((int)numsamples == lanemidlist.size());
-	cout << (int)lanemidlist.at(22).first << ":" << (int)lanemidlist.at(22).second << endl;
+	cout << (int)lanemidmap.at(22).first << ":" << (int)lanemidmap.at(22).second << endl;
+
+	/*
+	 * Create a Grpmap for each sampleID
+	 */	
+
+	Grpmap grpmaparr[numsamples]; // 48 * 96 = 4608 bytes!
+	size_t cntsamples = 0;
+	while(cntsamples < numsamples) {
+		cntsamples++; // start from 1
+		while(mut.getln(line) && !starts_with(line, END_OF_SMPL)) {
+			cout << line[0];
+		}
+		cout << endl;
+	}
+
 
 /*
 	map<uint64_t, GrpData*> grplist;
