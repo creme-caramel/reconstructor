@@ -1,0 +1,4 @@
+data/*
+filters
+*.o
+unittests/*.catch
