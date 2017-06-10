@@ -57,7 +57,7 @@ void Db::make_lanemidlist(stringstream &ss)
 	ss << i0 << " " << i1 << " " << i2 << "\n";
 }
 
-int Db::retrieve(const char *sql, stringstream &ss, int whichlist)
+int Db::retrieve(const string &sql, stringstream &ss, int whichlist)
 {
 	Fptr ptr;
 	switch(whichlist) {
@@ -71,7 +71,8 @@ int Db::retrieve(const char *sql, stringstream &ss, int whichlist)
 		break;
 	}
 
-	sqlite3_prepare(db, sql, strlen(sql)+1, &stmt, NULL);
+	const char *cmd = sql.c_str();
+	sqlite3_prepare(db, cmd, strlen(cmd)+1, &stmt, NULL);
 	int row = 0; // for testing
 	while(1) {
 		int s;

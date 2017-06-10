@@ -6,16 +6,18 @@ LIBS = -lsqlite3
 FILEPATH := $(realpath $(lastword $(MAKEFILE_LIST)))
 CURDIR := $(shell cd $(dir $(FILEPATH));pwd)
 DBDIR = $(CURDIR)/db
-TESTDIR = $(CURDIR)/unittests
-TESTINC = -I$(CURDIR)
+QDIR = $(CURDIR)/sql
+TESTDIR = $(CURDIR)/unittest
+INC = -I$(CURDIR)
 
 BIN = filters
 OBJ = grpinfo.o \
-	$(DBDIR)/db.o
+	$(DBDIR)/db.o \
+	$(QDIR)/query.o
 
 all: $(BIN)
 
-$(BIN): $(OBJ) filters.o 
+$(BIN): $(OBJ) filters.o
 	$(CXX) $(OBJ) filters.o  -o $(BIN) $(LIBS)
 
 .cpp.o:
@@ -27,6 +29,6 @@ clean:
 catch: $(patsubst $(TESTDIR)/%.cpp, $(TESTDIR)/%.catch, $(wildcard $(TESTDIR)/*.cpp))
 
 $(TESTDIR)/%.catch: $(TESTDIR)/%.cpp
-	$(CXX) $(FLAGS) $(CFLAGS) $< $(OBJ) $(TESTINC) -o $@ 
+	$(CXX) $(FLAGS) $(CFLAGS) $< $(OBJ) $(INC) -o $@ 
 
 .PHONY: all clean catch

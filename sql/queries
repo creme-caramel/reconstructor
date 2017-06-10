@@ -1,0 +1,2 @@
+select id, uber_consensus from uber_table;
+select id, lane, mid from uber_table;

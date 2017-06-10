@@ -1,4 +1,5 @@
 #include "db/db.h"
+#include "sql/query.h"
 #include "grpinfo.h"
 #include <stdint.h>
 #include <string>
@@ -15,8 +16,9 @@ int main(int argc, char **argv) {
 
 	enum { UBERCON, LANEMID };
 	Db db(argv[1]);
-	stringstream ss;
-	char *sql;
+	Query q("sql/queries");
+	stringstream readdb;
+	string cmd;
 	uint8_t numsamples; // for testing
 
 	map<uint8_t, string> uberconlist;
@@ -26,15 +28,15 @@ int main(int argc, char **argv) {
 	 * Store uber consensus of each sample
 	 */
 
-	sql = (char *)"select id, uber_consensus from uber_table";
+	q.getquery(cmd);
 	string id, ubr;
-	if(db.retrieve(sql, ss, UBERCON) != 0)
+	if(db.retrieve(cmd, readdb, UBERCON) != 0)
 		cout << "db error" << endl;
-	while(ss >> id && ss >> ubr) {
+	while(readdb >> id && readdb >> ubr) {
 		uint8_t idnum = stoi(id);
 		uberconlist.insert(make_pair(idnum, ubr));
 	}
-	ss.clear();
+	readdb.clear();
 
 	numsamples = uberconlist.size();
 	cout << (int)numsamples << endl;
@@ -44,17 +46,17 @@ int main(int argc, char **argv) {
 	 * Identify each sample with lane/mid nums
 	 */
 
-	sql = (char *)"select id, lane, mid from uber_table";
-	if(db.retrieve(sql, ss, LANEMID) != 0)
+	q.getquery(cmd);
+	if(db.retrieve(cmd, readdb, LANEMID) != 0)
 		cout << "db error" << endl;
 	string lane, mid;
-	while(ss >> id && ss >> lane && ss >> mid) {
+	while(readdb >> id && readdb >> lane && readdb >> mid) {
 		uint8_t idnum = stoi(id);
 		uint8_t lanenum = stoi(lane);
 		uint8_t midnum = stoi(mid);
 		lanemidlist.insert(make_pair(idnum, make_pair(lanenum, midnum)));
 	}
-	ss.clear();
+	readdb.clear();
 
 	assert((int)numsamples == lanemidlist.size());
 	cout << (int)lanemidlist.at(22).first << ":" << (int)lanemidlist.at(22).second << endl;

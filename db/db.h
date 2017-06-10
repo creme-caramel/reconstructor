@@ -22,7 +22,7 @@ public:
 	Db(const char *) throw(DbError);
 	~Db();
 
-	int retrieve(const char *, std::stringstream &ss, int);
+	int retrieve(const std::string &, std::stringstream &ss, int);
 	int exec_old(char *, void *);
 	friend int callback(void *, int, char **, char **);
 };
