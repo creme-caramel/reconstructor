@@ -3,14 +3,7 @@
 #include <cstdio>
 #include <cstring>
 using namespace std;
-
-
-/*
-void make_list(void (*p)(stringstream &), stringstream &ss)
-{
-	(*p)(ss);
-}
-*/
+using Fptr = void (Db::*)(stringstream &);
 
 int callback(void *data, int argc, char **argv, char **azcolname)
 {
@@ -46,8 +39,6 @@ int Db::init(const char *str)
 	return EXIT_SUCCESS; // 0
 }
 
-
-
 void Db::make_uberconlist(stringstream &ss)
 {
 	int bytes;
@@ -57,9 +48,16 @@ void Db::make_uberconlist(stringstream &ss)
 	ss << bytes << " " << text << "\n";
 }
 
+/*
+void make_list(void (*p)(stringstream &), stringstream &ss)
+{
+	(*p)(ss);
+}
+*/
+
 int Db::retrieve(const char *sql, stringstream &ss)
 {
-	void (Db::*ptr)(std::stringstream &) = &Db::make_uberconlist;
+	Fptr ptr = &Db::make_uberconlist;
 	sqlite3_prepare(db, sql, strlen(sql)+1, &stmt, NULL);
 	int row = 0;
 	while(1) {
