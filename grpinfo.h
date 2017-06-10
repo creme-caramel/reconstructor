@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
-#include <iosfwd>
 #include <stdint.h>
 using namespace std;
 
@@ -31,7 +30,7 @@ class GrpInfo {
 	vector<struct Mutation> mutationlist;
 
 public:
-	struct Mutation {
+	struct Mutation { // 8 bytes
 /*
 		pos: mitomap position of the mutation
 		type: type of mutation // aka is it a G to A, A to C, C to :

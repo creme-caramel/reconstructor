@@ -12,7 +12,7 @@ class Db {
 
 	int init(const char *);
 	void make_uberconlist(std::stringstream &);
-	//void make_list(void (*ptr)(std::stringstream &), std::stringstream &);
+	void make_lanemidlist(std::stringstream &);
 public:
 	struct DbError : public std::logic_error {
 		DbError(const std::string &msg = "") : std::logic_error(msg) {}
@@ -22,7 +22,7 @@ public:
 	Db(const char *) throw(DbError);
 	~Db();
 
-	int retrieve(const char *, std::stringstream &ss);
+	int retrieve(const char *, std::stringstream &ss, int);
 	int exec_old(char *, void *);
 	friend int callback(void *, int, char **, char **);
 };

@@ -36,36 +36,49 @@ int Db::init(const char *str)
 		fprintf(stderr, "sqlite err: %s\n", sqlite3_errmsg(db));
 		return EXIT_FAILURE;
 	}
-	return EXIT_SUCCESS; // 0
+	return EXIT_SUCCESS;
 }
 
 void Db::make_uberconlist(stringstream &ss)
 {
-	int bytes;
-	const unsigned char * text;
-	bytes = sqlite3_column_int(stmt, 0);
-	text  = sqlite3_column_text(stmt, 1);
-	ss << bytes << " " << text << "\n";
+	int i0;
+	const unsigned char * t1;
+	i0 = sqlite3_column_int(stmt, 0);
+	t1  = sqlite3_column_text(stmt, 1);
+	ss << i0 << " " << t1 << "\n";
 }
 
-/*
-void make_list(void (*p)(stringstream &), stringstream &ss)
+void Db::make_lanemidlist(stringstream &ss)
 {
-	(*p)(ss);
+	int i0, i1, i2;
+	i0 = sqlite3_column_int(stmt, 0);
+	i1 = sqlite3_column_int(stmt, 1);
+	i2 = sqlite3_column_int(stmt, 2);
+	ss << i0 << " " << i1 << " " << i2 << "\n";
 }
-*/
 
-int Db::retrieve(const char *sql, stringstream &ss)
+int Db::retrieve(const char *sql, stringstream &ss, int whichlist)
 {
-	Fptr ptr = &Db::make_uberconlist;
+	Fptr ptr;
+	switch(whichlist) {
+	case 0:
+		ptr = &Db::make_uberconlist;	
+		break;
+	case 1:
+		ptr = &Db::make_lanemidlist;	
+		break;
+	default:
+		break;
+	}
+
 	sqlite3_prepare(db, sql, strlen(sql)+1, &stmt, NULL);
-	int row = 0;
+	int row = 0; // for testing
 	while(1) {
 		int s;
 		s = sqlite3_step(stmt);
 		if(s == SQLITE_ROW) {
-			row++;				
-			(this->*ptr)(ss);				
+			row++;					
+			(this->*ptr)(ss);		
 		} else if(s == SQLITE_DONE) {
 			break;
 		} else {
