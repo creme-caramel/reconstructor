@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <iostream>
 #include <map>
+#include <queue>
 #include <cassert>
 #include <boost/algorithm/string/predicate.hpp>
 using namespace std;
@@ -75,13 +76,35 @@ int main(int argc, char **argv) {
 	size_t cntsamples = 0;
 	while(cntsamples < numsamples) {
 		cntsamples++; // start from 1
+		queue<pair<int, int> > pairsque;
+		int fiveint[5]; // members, pos, type, subst, hetero
+
 		while(mut.getln(line) && !starts_with(line, END_OF_SMPL)) {
-			cout << line[0];
+			if(starts_with(line, "#")) {
+				if(!pairsque.empty()) {
+					stringstream ss(line);
+					string skip;
+					ss >> skip;
+					for(int i = 0; i < 5; i++)
+						ss >> fiveint[i];
+					while(!pairsque.empty()) {
+						int grpid = pairsque.front().first;
+						int freq = pairsque.front().second;
+						pairsque.pop();
+						cout << "group" << grpid << ": " << freq << " " << fiveint[0] << " " << fiveint[1] << " " << fiveint[2] << " " << fiveint[3] << " " << fiveint[4]  << endl;
+					}
+					cout << "HERE" << endl;
+				}
+			} else {
+				stringstream ss(line);
+				int grpid, freq;
+				ss >> grpid >> freq;
+				pairsque.push(make_pair(grpid, freq));
+			}
 		}
-		cout << endl;
+		cout << "END_OF_SMPL " << cntsamples << endl;
 	}
 	cout << sizeof(grpmaparr) << endl;
-
 
 /*
 	map<uint64_t, GrpData*> grplist;
