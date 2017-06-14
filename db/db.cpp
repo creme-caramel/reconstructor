@@ -2,6 +2,7 @@
 #include "db.h"
 #include <cstdio>
 #include <cstring>
+#include <string>
 using namespace std;
 using Fptr = void (Db::*)(stringstream &);
 
@@ -90,6 +91,32 @@ int Db::retrieve(const string &sql, stringstream &ss, int whichlist)
 	sqlite3_finalize(stmt);
 	return EXIT_SUCCESS;
 }
+
+int Db::retrieve(const string &sql, string &str)
+{
+	const char *cmd = sql.c_str();
+	sqlite3_prepare(db, cmd, strlen(cmd)+1, &stmt, NULL);
+	int row = 0; // for testing
+	while(1) {
+		int s;
+		s = sqlite3_step(stmt);
+		if(s == SQLITE_ROW) {
+			row++;					
+			const unsigned char * t;
+			t  = sqlite3_column_text(stmt, 0);
+			string temp(reinterpret_cast<const char*>(t));
+			str = temp;
+		} else if(s == SQLITE_DONE) {
+			break;
+		} else {
+			fprintf(stderr, "failed\n");
+			return EXIT_FAILURE;
+		}
+	}
+	sqlite3_finalize(stmt);
+	return EXIT_SUCCESS;
+}
+
 
 int Db::exec_old(char *sql, void *msg)
 {

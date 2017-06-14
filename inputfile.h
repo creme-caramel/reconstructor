@@ -12,9 +12,9 @@ public:
 		InputFileError(const char *msg) : std::runtime_error(msg) {}
 	};
 
-	InputFile(const char *);
+	InputFile(const char *) throw(InputFileError);
 	~InputFile();
-	bool getln(std::string &);
+	bool getln(std::string &) throw(InputFileError);
 	std::ifstream *fp();
 };
 

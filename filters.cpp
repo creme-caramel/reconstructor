@@ -7,8 +7,11 @@
 #include <queue>
 #include <cassert>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/range/adaptor/map.hpp>
+#include <boost/range/algorithm/copy.hpp>
 using namespace std;
 using namespace boost::algorithm;
+using namespace boost::adaptors;
 
 #define QFILE "sql/queries"
 #define END_OF_SMPL "EOS"
@@ -24,21 +27,21 @@ int main(int argc, char **argv) {
 	InputFile q(QFILE);
 	InputFile mut(argv[2]);
 	stringstream ss;
-	string line;
+	string sqlcmd, mutln;
 	size_t numsamples;
 
 	map<uint8_t, string> uberconmap;
-	map<uint8_t, pair<uint8_t, uint8_t> > lanemidmap;
-	typedef map<uint64_t, GrpInfo*> Grpmap; // 48 bytes each
+	map<uint8_t, pair<string, string> > lanemidmap;
 
 	/*
 	 * Store uber consensus of each sample
 	 */
 
-	q.getln(line);
+	q.getln(sqlcmd);
 	string id, ubr;
-	if(db.retrieve(line, ss, UBERCON) != 0)
+	if(db.retrieve(sqlcmd, ss, UBERCON) != 0)
 		cout << "db error" << endl;
+
 	while(ss >> id && ss >> ubr) {
 		uint8_t idnum = stoi(id);
 		uberconmap.insert(make_pair(idnum, ubr));
@@ -46,43 +49,43 @@ int main(int argc, char **argv) {
 	ss.clear();
 	numsamples = uberconmap.size();
 
-	cout << numsamples << endl;
-	cout << uberconmap.at(22) << endl;
+	//cout << numsamples << endl;
+	//cout << uberconmap.at(22) << endl;
 
 	/*
 	 * Identify each sample with lane/mid nums
 	 */
 
-	q.getln(line);
-	if(db.retrieve(line, ss, LANEMID) != 0)
+	q.getln(sqlcmd);
+	if(db.retrieve(sqlcmd, ss, LANEMID) != 0)
 		cout << "db error" << endl;
 	string lane, mid;
+
 	while(ss >> id && ss >> lane && ss >> mid) {
 		uint8_t idnum = stoi(id);
-		uint8_t lanenum = stoi(lane);
-		uint8_t midnum = stoi(mid);
-		lanemidmap.insert(make_pair(idnum, make_pair(lanenum, midnum)));
+		lanemidmap.insert(make_pair(idnum, make_pair(lane, mid)));
 	}
 	ss.clear();
 	assert(numsamples == lanemidmap.size());
 
-	cout << (int)lanemidmap.at(22).first << ":" << (int)lanemidmap.at(22).second << endl;
-
 	/*
 	 * Create a Grpmap for each sampleID
-	 */	
+	 */
 
-	Grpmap grpmaparr[numsamples]; // 48 * 96 = 4608 bytes!
-	size_t cntsamples = 0;
-	while(cntsamples < numsamples) {
-		cntsamples++; // start from 1
+	typedef map<uint64_t, GrpInfo*> Grpmap; // 48 bytes each
+	Grpmap grpmaps[numsamples]; // 48 * 96 = 4608 bytes!
+	size_t cnt = 0; // count samples
+	q.getln(sqlcmd);
+
+	while(cnt < numsamples) {
+		cnt++; // start from 1
 		queue<pair<int, int> > pairsque;
 		int fiveint[5]; // members, pos, type, subst, hetero
 
-		while(mut.getln(line) && !starts_with(line, END_OF_SMPL)) {
-			if(starts_with(line, "#")) {
+		while(mut.getln(mutln) && !starts_with(mutln, END_OF_SMPL)) {
+			if(starts_with(mutln, "#")) {
 				if(!pairsque.empty()) {
-					stringstream ss(line);
+					stringstream ss(mutln);
 					string skip;
 					ss >> skip;
 					for(int i = 0; i < 5; i++)
@@ -91,33 +94,60 @@ int main(int argc, char **argv) {
 						int grpid = pairsque.front().first;
 						int freq = pairsque.front().second;
 						pairsque.pop();
-						cout << "group" << grpid << ": " << freq << " " << fiveint[0] << " " << fiveint[1] << " " << fiveint[2] << " " << fiveint[3] << " " << fiveint[4]  << endl;
+						// TEST1
+						//cout << "group" << grpid << ": " << freq << " " << fiveint[0] << " " << fiveint[1] << " " << fiveint[2] << " " << fiveint[3] << " " << fiveint[4]  << endl;
+
+						/*
+						 * Build Grpmap members
+						 */
+
+						if(grpmaps[cnt-1].count(grpid) > 0) {
+							// already id exists.
+
+						} else {
+							string lane, mid, consensus;
+							string cmd = sqlcmd;
+							stringstream grpss;
+
+							lane = lanemidmap.at(cnt).first;
+							mid = lanemidmap.at(cnt).second;
+							grpss << grpid;
+							
+							cmd.replace(53, 1, lane);
+							cmd.replace(cmd.end()-18, cmd.end()-17, mid);
+							cmd.replace(cmd.end()-2, cmd.end()-1, grpss.str());
+							// TEST3
+							cout << cmd << endl;
+
+							if(db.retrieve(cmd, consensus) != 0) // this takes lots of runtime
+								cout << "db error" << endl;
+							// TEST3
+							cout << consensus << endl;
+
+							GrpInfo gi;
+							grpmaps[cnt-1].insert(make_pair(grpid, &gi));
+						}
 					}
-					cout << "HERE" << endl;
+					// TEST1
+					//cout << "HERE" << endl;
 				}
 			} else {
-				stringstream ss(line);
+				stringstream ss(mutln);
 				int grpid, freq;
 				ss >> grpid >> freq;
 				pairsque.push(make_pair(grpid, freq));
 			}
 		}
-		cout << "END_OF_SMPL " << cntsamples << endl;
-	}
-	cout << sizeof(grpmaparr) << endl;
-
+		// TEST1
+		//cout << "END_OF_SMPL " << cnt << endl;
 /*
-	map<uint64_t, GrpData*> grplist;
-	if(grplist(234).count() > 0) {
-		// already there. just add on
-	}
-	else {
-		GrpData whatever;
-		grplist.insert(make_pair(234, &whatever));
-	}
+		// TEST2
+		vector<uint16_t> keys;
+		boost::copy(grpmaps[cnt-1] | map_keys, back_inserter(keys));
+		for (auto i: keys)
+			std::cout << (int)i << ' ';
+		cout << endl << endl;
 */
-
+	}
 	return EXIT_SUCCESS;
 }
-
-

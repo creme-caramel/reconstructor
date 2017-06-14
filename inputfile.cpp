@@ -1,7 +1,7 @@
 #include "inputfile.h"
 using namespace std;
 
-InputFile::InputFile(const char *fname)
+InputFile::InputFile(const char *fname) throw(InputFileError)
 {
 	f.open(fname);
 	if(!f.is_open())
@@ -13,7 +13,7 @@ InputFile::~InputFile()
 	f.close();
 }
 
-bool InputFile::getln(string &cmd)
+bool InputFile::getln(string &cmd) throw(InputFileError)
 {
 	if(!getline(f, cmd)) {
 		throw InputFileError("No more line from ifstream");

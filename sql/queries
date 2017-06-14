@@ -1,2 +1,3 @@
 select id, uber_consensus from uber_table;
 select id, lane, mid from uber_table;
+select group_consensus from group_table where lane = L AND mid = M AND groupID = G;

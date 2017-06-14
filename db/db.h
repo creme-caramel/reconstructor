@@ -23,6 +23,7 @@ public:
 	~Db();
 
 	int retrieve(const std::string &, std::stringstream &ss, int);
+	int retrieve(const std::string &, std::string &);
 	int exec_old(char *, void *);
 	friend int callback(void *, int, char **, char **);
 };
