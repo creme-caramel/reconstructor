@@ -52,6 +52,14 @@ int main(int argc, char **argv) {
 	//cout << numsamples << endl;
 	//cout << uberconmap.at(22) << endl;
 
+	// TEST4
+	/*
+	for(int i=1; i <= numsamples; i++) {
+		cout << i << endl;
+		cout << uberconmap.at(i) << endl;
+	}
+	*/
+
 	/*
 	 * Identify each sample with lane/mid nums
 	 */
@@ -103,7 +111,6 @@ int main(int argc, char **argv) {
 
 						if(grpmaps[cnt-1].count(grpid) > 0) {
 							// already id exists.
-
 						} else {
 							string lane, mid, consensus;
 							string cmd = sqlcmd;
@@ -117,19 +124,19 @@ int main(int argc, char **argv) {
 							cmd.replace(cmd.end()-18, cmd.end()-17, mid);
 							cmd.replace(cmd.end()-2, cmd.end()-1, grpss.str());
 							// TEST3
-							cout << cmd << endl;
+							//cout << cmd << endl;
 
 							if(db.retrieve(cmd, consensus) != 0) // this takes lots of runtime
 								cout << "db error" << endl;
 							// TEST3
-							cout << consensus << endl;
+							//cout << consensus << endl;
 
-							GrpInfo gi;
+							GrpInfo gi; // better be named with sample id [1, 96]
 							grpmaps[cnt-1].insert(make_pair(grpid, &gi));
 						}
 					}
 					// TEST1
-					//cout << "HERE" << endl;
+					//cout << "LINE_BREAK_IN_OUTPUT_TXT" << endl;
 				}
 			} else {
 				stringstream ss(mutln);
@@ -141,12 +148,12 @@ int main(int argc, char **argv) {
 		// TEST1
 		//cout << "END_OF_SMPL " << cnt << endl;
 /*
-		// TEST2
+		// TEST2 (very slow boost)
 		vector<uint16_t> keys;
 		boost::copy(grpmaps[cnt-1] | map_keys, back_inserter(keys));
 		for (auto i: keys)
 			std::cout << (int)i << ' ';
-		cout << endl << endl;
+		cout << endl;
 */
 	}
 	return EXIT_SUCCESS;
