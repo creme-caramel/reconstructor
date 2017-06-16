@@ -53,13 +53,12 @@ int main(int argc, char **argv) {
 	//cout << uberconmap.at(22) << endl;
 
 	// TEST4
-	/*
+/*
 	for(int i=1; i <= numsamples; i++) {
 		cout << i << endl;
 		cout << uberconmap.at(i) << endl;
 	}
-	*/
-
+*/
 	/*
 	 * Identify each sample with lane/mid nums
 	 */
@@ -88,7 +87,7 @@ int main(int argc, char **argv) {
 	while(cnt < numsamples) {
 		cnt++; // start from 1
 		queue<pair<int, int> > pairsque;
-		int fiveint[5]; // members, pos, type, subst, hetero
+		int mutinfo[6]; // freq, members, pos, type, subst, hetero
 
 		while(mut.getln(mutln) && !starts_with(mutln, END_OF_SMPL)) {
 			if(starts_with(mutln, "#")) {
@@ -96,14 +95,14 @@ int main(int argc, char **argv) {
 					stringstream ss(mutln);
 					string skip;
 					ss >> skip;
-					for(int i = 0; i < 5; i++)
-						ss >> fiveint[i];
+					for(int i = 1; i < 6; i++)
+						ss >> mutinfo[i];
 					while(!pairsque.empty()) {
 						int grpid = pairsque.front().first;
-						int freq = pairsque.front().second;
+						mutinfo[0] = pairsque.front().second;
 						pairsque.pop();
 						// TEST1
-						//cout << "group" << grpid << ": " << freq << " " << fiveint[0] << " " << fiveint[1] << " " << fiveint[2] << " " << fiveint[3] << " " << fiveint[4]  << endl;
+						//cout << "group" << grpid << ": " << mutinfo[0] << " " << mutinfo[1] << " " << mutinfo[2] << " " << mutinfo[3] << " " << mutinfo[4] << " " << mutinfo[5]  << endl;
 
 						/*
 						 * Build Grpmap members
@@ -111,8 +110,9 @@ int main(int argc, char **argv) {
 
 						if(grpmaps[cnt-1].count(grpid) > 0) {
 							// already id exists.
+							//grpmaps[cnt-1].at(grpid)->update(mutinfo);
 						} else {
-							string lane, mid, consensus;
+							string lane, mid;
 							string cmd = sqlcmd;
 							stringstream grpss;
 
@@ -126,13 +126,15 @@ int main(int argc, char **argv) {
 							// TEST3
 							//cout << cmd << endl;
 
-							if(db.retrieve(cmd, consensus) != 0) // this takes lots of runtime
+							string consensus;
+							if(db.retrieve(cmd, consensus) != 0)
 								cout << "db error" << endl;
 							// TEST3
 							//cout << consensus << endl;
 
-							GrpInfo gi; // better be named with sample id [1, 96]
+							GrpInfo gi(consensus);
 							grpmaps[cnt-1].insert(make_pair(grpid, &gi));
+							grpmaps[cnt-1].at(grpid)->update(mutinfo);
 						}
 					}
 					// TEST1
