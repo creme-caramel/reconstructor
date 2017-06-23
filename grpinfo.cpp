@@ -4,12 +4,13 @@
 
 GrpInfo::GrpInfo()
 {
-	GrpInfo(nullptr);
+	GrpInfo(0);
 }
 
-GrpInfo::GrpInfo(const string &con) throw(GrpError)
+GrpInfo::GrpInfo(const uint32_t id) throw(GrpError)
 {
-	consensus = &con;
+	grpid = id;
+	//consensus = "";
 	num_members = 0;
 	num_true_som_subst = 0;
 	num_true_het_subst = 0;
@@ -17,6 +18,11 @@ GrpInfo::GrpInfo(const string &con) throw(GrpError)
 	num_true_het_indel = 0;
 	matchingsample = 0;
 	howmany = 0;
+}
+
+uint32_t *GrpInfo::getgrpid()
+{
+	return &grpid;
 }
 
 void GrpInfo::update(const int arr[6])
