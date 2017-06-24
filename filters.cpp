@@ -76,7 +76,6 @@ int main(int argc, char **argv) {
 	 * Create a Grpmap for each sampleID
 	 */
 
-	Givec grpinfovecs[numsamples];
 	I32gimap grpmaps[numsamples]; // 48 * 96 = 4608 bytes!
 	size_t cnt = 0; // count samples
 	q.getln(sqlcmd);
@@ -108,11 +107,11 @@ int main(int argc, char **argv) {
 
 						if(grpmaps[cnt-1].count(grpid) > 0) {
 							// already grpid exists.
-
-							//grpmaps[cnt-1].at(grpid)->update(mutinfo);
+							cout << grpid << "\t" << *grpmaps[cnt-1].at(grpid)->getgrpid() << endl;
+							grpmaps[cnt-1].at(grpid)->update(mutinfo);
 						}
 						else {
-							// new grp id detected
+							// new grp id detected.
 							string cmd, consensus;
 							cmd = sqlcmd;
 							getselectcmd(cmd, lanemidmap, grpid, cnt); 
@@ -120,8 +119,8 @@ int main(int argc, char **argv) {
 								cout << "db err" << endl;
 							// TEST3
 							// cout << cmd << endl << consensus << endl;
-							grpinfovecs[cnt-1].push_back(GrpInfo(grpid));
-							grpmaps[cnt-1].insert(make_pair(grpid, &grpinfovecs[cnt-1].back()));
+							Giptr gi(new GrpInfo(grpid, consensus));
+							grpmaps[cnt-1].insert(make_pair(grpid, move(gi)));
 							grpmaps[cnt-1].at(grpid)->update(mutinfo);
 						}
 					}
@@ -139,11 +138,14 @@ int main(int argc, char **argv) {
 		//cout << "END_OF_SMPL " << cnt << endl;
 		//
 		// TEST2 (very slow boost)
+
+		/*
 		vector<uint16_t> keys;
 		boost::copy(grpmaps[cnt-1] | map_keys, back_inserter(keys));
 		for (auto i: keys)
 			std::cout << (int)i << ' ';
 		cout << endl;
+		*/
 	}
 	return EXIT_SUCCESS;
 }

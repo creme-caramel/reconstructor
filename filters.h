@@ -4,12 +4,13 @@
 #include "grpinfo.h"
 #include <map>
 #include <sstream>
+#include <memory>
 using namespace std;
 
 typedef map<uint8_t, string> I8strmap;
 typedef map<uint8_t, pair<string, string> > I8strstrmap;
-typedef map<uint32_t, GrpInfo *> I32gimap;
-typedef vector<GrpInfo> Givec;
+typedef unique_ptr<GrpInfo, GrpInfoDeleter> Giptr;
+typedef map<uint32_t, Giptr> I32gimap;
 
 inline void getselectcmd(string &cmd, const I8strstrmap &map, const int &id, size_t cnt)
 {

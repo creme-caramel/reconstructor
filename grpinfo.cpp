@@ -4,13 +4,12 @@
 
 GrpInfo::GrpInfo()
 {
-	GrpInfo(0);
+	GrpInfo(0, "none");
 }
 
-GrpInfo::GrpInfo(const uint32_t id) throw(GrpError)
+GrpInfo::GrpInfo(const uint32_t id, string str) throw(GrpError)
 {
 	grpid = id;
-	//consensus = "";
 	num_members = 0;
 	num_true_som_subst = 0;
 	num_true_het_subst = 0;
@@ -18,6 +17,7 @@ GrpInfo::GrpInfo(const uint32_t id) throw(GrpError)
 	num_true_het_indel = 0;
 	matchingsample = 0;
 	howmany = 0;
+	consensus = str;
 }
 
 uint32_t *GrpInfo::getgrpid()
@@ -47,8 +47,8 @@ void GrpInfo::update(const int arr[6])
 			break;
 	}
 
-	const Mutation m = {(uint16_t)arr[0], (uint16_t)arr[2], (uint8_t)arr[3], c};
-	mutationlist.push_back(m);
+	//const Mutation m = {(uint16_t)arr[0], (uint16_t)arr[2], (uint8_t)arr[3], c};
+	//mutationlist.push_back(m);
 
 	if(num_members == 0) 
 		num_members = arr[1];
@@ -74,14 +74,14 @@ string GrpInfo::grptostring() const
 	ss << num_true_het_indel << " ";
 	ss << num_true_het_indel << " ";
 	ss << matchingsample << " ";
-	ss << howmany << " ";	
+	ss << howmany << " ";
 	return ss.str();
 }
 
 void GrpInfo::print() const
 {
 	cout << grptostring() << endl;
-	for (auto i = mutationlist.begin(); i != mutationlist.end(); ++i)
-		cout << muttostring(*i) << " ";
+	//for (auto i = mutationlist.begin(); i != mutationlist.end(); ++i)
+	//	cout << muttostring(*i) << " ";
 	cout << endl;
 }
