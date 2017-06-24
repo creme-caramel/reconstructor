@@ -12,6 +12,7 @@ using namespace boost::adaptors;
 
 #define QFILE "sql/queries"
 #define END_OF_SMPL "EOS"
+#define MI 6 // // mutinfo: freq, members, pos, type, subst, hetero
 
 int main(int argc, char **argv) {
 	if(argc != 3) {
@@ -45,16 +46,14 @@ int main(int argc, char **argv) {
 	ss.clear();
 	numsamples = uberconmap.size();
 
-	//cout << numsamples << endl;
-	//cout << uberconmap.at(22) << endl;
-
 	// TEST4
-/*
+	/*
 	for(int i=1; i <= numsamples; i++) {
 		cout << i << endl;
 		cout << uberconmap.at(i) << endl;
 	}
-*/
+	*/
+
 	/*
 	 * Identify each sample with lane/mid nums
 	 */
@@ -72,7 +71,6 @@ int main(int argc, char **argv) {
 	assert(numsamples == lanemidmap.size());
 
 	/*
-	 * Create a Grpinfovec for each sampleID
 	 * Create a Grpmap for each sampleID
 	 */
 
@@ -83,16 +81,12 @@ int main(int argc, char **argv) {
 	while(cnt < numsamples) { // for each sample [1, 96]
 		cnt++; // start from 1
 		queue<pair<int, int> > pairsque;
-		int mutinfo[6]; // freq, members, pos, type, subst, hetero
+		int mutinfo[MI]; 
 
 		while(mut.getln(mutln) && !starts_with(mutln, END_OF_SMPL)) {
 			if(starts_with(mutln, "#")) {
 				if(!pairsque.empty()) {
-					stringstream ss(mutln);
-					string skip;
-					ss >> skip;
-					for(int i = 1; i < 6; i++)
-						ss >> mutinfo[i];
+					makemutinfo(mutinfo, mutln, (int)MI);
 					while(!pairsque.empty()) {
 						int grpid = pairsque.front().first;
 						mutinfo[0] = pairsque.front().second;
@@ -102,12 +96,12 @@ int main(int argc, char **argv) {
 						//<< " " << mutinfo[3] << " " << mutinfo[4] << " " << mutinfo[5]  << endl;
 
 						/*
-						 * Build Grpmap and Grpinfovec members
+						 * Build Grpmap members
 						 */
 
 						if(grpmaps[cnt-1].count(grpid) > 0) {
 							// already grpid exists.
-							cout << grpid << "\t" << *grpmaps[cnt-1].at(grpid)->getgrpid() << endl;
+							// cout << grpid << "\t" << *grpmaps[cnt-1].at(grpid)->getgrpid() << endl;						
 							grpmaps[cnt-1].at(grpid)->update(mutinfo);
 						}
 						else {
@@ -125,13 +119,10 @@ int main(int argc, char **argv) {
 						}
 					}
 					// TEST1
-					//cout << "LINE_BREAK_IN_OUTPUT_TXT" << endl;
+					// cout << "LINE_BREAK_IN_OUTPUT_TXT" << endl;
 				}
 			} else {
-				stringstream ss(mutln);
-				int grpid, freq;
-				ss >> grpid >> freq;
-				pairsque.push(make_pair(grpid, freq));
+				pairsque.push(getidfr(mutln));
 			}
 		}
 		// TEST1

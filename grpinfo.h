@@ -5,6 +5,7 @@
 #include <vector>
 #include <stdexcept>
 #include <stdint.h>
+#include <memory>
 using namespace std;
 
 class GrpInfo {
@@ -24,6 +25,12 @@ class GrpInfo {
 		uint8_t type;
 		unsigned char hetero_subst;
 	} Mutation;
+
+	typedef vector<Mutation> Mutvec;
+	struct MutvecDeleter {
+		void operator()(Mutvec *mv) { delete(mv); }
+	};
+	typedef unique_ptr<Mutvec, MutvecDeleter> Mptr;
 
 	/*
 	 * num_members: number of sequences that make up the group
@@ -45,8 +52,8 @@ class GrpInfo {
 	uint16_t num_true_het_indel;
 	uint8_t matchingsample;
 	uint8_t howmany; // ?
+	Mptr mptr;
 	string consensus;
-	//vector<Mutation> mutationlist;
 
 public:
 	struct GrpError : public logic_error {
@@ -56,6 +63,7 @@ public:
 	GrpInfo();
 	GrpInfo(const uint32_t, string) throw(GrpError);
 	uint32_t *getgrpid();
+	string *getgrcon();
 	void update(const int[]);
 	string muttostring(const Mutation &) const;
 	string grptostring() const;
