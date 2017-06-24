@@ -64,6 +64,7 @@ public:
 	GrpInfo(const uint32_t, string) throw(GrpError);
 	uint32_t *getgrpid();
 	string *getgrcon();
+	int getmutnum();
 	void update(const int[]);
 	string muttostring(const Mutation &) const;
 	string grptostring() const;

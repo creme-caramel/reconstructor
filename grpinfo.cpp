@@ -32,6 +32,11 @@ string *GrpInfo::getgrcon()
 	return &consensus;
 }
 
+int GrpInfo::getmutnum()
+{
+	return mptr->size();
+}
+
 void GrpInfo::update(const int arr[6])
 {
 	// [0] freq, [1] members, [2] pos, [3] type, [4] sub, [5] het

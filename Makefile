@@ -6,12 +6,13 @@ LIBS = -lsqlite3
 FILEPATH := $(realpath $(lastword $(MAKEFILE_LIST)))
 CURDIR := $(shell cd $(dir $(FILEPATH));pwd)
 DBDIR = $(CURDIR)/db
+IODIR = $(CURDIR)/io
 TESTDIR = $(CURDIR)/unittest
 INC = -I$(CURDIR)
 
 BIN = filters
 OBJ = grpinfo.o \
-	inputfile.o \
+	$(IODIR)/inputfile.o \
 	$(DBDIR)/db.o
 
 
