@@ -22,21 +22,6 @@ GrpInfo::GrpInfo(const uint32_t id, string str) throw(GrpError)
 	consensus = str;
 }
 
-uint32_t *GrpInfo::getgrpid()
-{
-	return &grpid;
-}
-
-string *GrpInfo::getgrcon()
-{
-	return &consensus;
-}
-
-int GrpInfo::getmutnum()
-{
-	return mptr->size();
-}
-
 void GrpInfo::update(const int arr[6])
 {
 	// [0] freq, [1] members, [2] pos, [3] type, [4] sub, [5] het
@@ -63,33 +48,51 @@ void GrpInfo::update(const int arr[6])
 		num_members = arr[1];
 }
 
+uint32_t *GrpInfo::getgrpid()
+{
+	return &grpid;
+}
+
+string *GrpInfo::getgrcon()
+{
+	return &consensus;
+}
+
+size_t GrpInfo::getmutnum()
+{
+	return mptr->size();
+}
+
 string GrpInfo::muttostring(const Mutation &m) const
 {
 	stringstream ss;
-	int sub_nib = m.hetero_subst & 0xf; // lo
-	int het_nib = (m.hetero_subst >> 4) & 0xf; // hi
-	ss << sub_nib << het_nib;
+	ss << (int)m.freq;
+	ss << "|" << (int)m.pos;
+	ss << "|" << (int)m.type;
+	ss << "|" << (int)(m.hetero_subst & 0xf); // lo sub_nib 
+	ss << "|" << (int)((m.hetero_subst >> 4) & 0xf); // hi het_nib;
 	return ss.str();
 }
 
 string GrpInfo::grptostring() const
 {
 	stringstream ss;
-	ss << num_members << " ";
-	ss << num_true_som_subst << " ";
-	ss << num_true_het_subst << " ";
-	ss << num_true_som_indel << " ";
-	ss << num_true_het_indel << " ";
-	ss << num_true_het_indel << " ";
-	ss << matchingsample << " ";
-	ss << howmany << " ";
+	ss << (int)grpid;
+	ss << "\t" << (int)num_members;
+	ss << "\t" << (int)num_true_som_subst;
+	ss << "\t" << (int)num_true_het_subst;
+//	ss << "\t" << (int)num_true_som_indel;
+//	ss << "\t" << (int)num_true_het_indel;
+//	ss << "\t" << (int)num_true_het_indel;
+//	ss << "\t" << (int)matchingsample;
+//	ss << "\t" << (int)howmany;
 	return ss.str();
 }
 
 void GrpInfo::print() const
 {
-	cout << grptostring() << endl;
+	cout << grptostring() << "\t" << (int)mptr->size() << "\t";
 	for (auto i = mptr->begin(); i != mptr->end(); ++i)
-		cout << muttostring(*i) << " ";
+		cout << muttostring(*i) << "\t";
 	cout << endl;
 }

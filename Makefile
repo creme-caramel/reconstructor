@@ -15,7 +15,6 @@ OBJ = grpinfo.o \
 	$(IODIR)/inputfile.o \
 	$(DBDIR)/db.o
 
-
 all: $(BIN)
 
 $(BIN): $(OBJ) filters.o

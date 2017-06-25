@@ -1,14 +1,10 @@
 #include "filters.h"
 #include "db/db.h"
 #include "io/inputfile.h"
-#include <iostream>
+
 #include <queue>
-#include <cassert>
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/range/adaptor/map.hpp>
-#include <boost/range/algorithm/copy.hpp>
+#include <boost/algorithm/string/predicate.hpp> // start_with
 using namespace boost::algorithm;
-using namespace boost::adaptors;
 
 #define QFILE "sql/queries"
 #define END_OF_SMPL "EOS"
@@ -63,7 +59,7 @@ int main(int argc, char **argv) {
 	 * Create a Grpmap for each sampleID
 	 */
 
-	I32gimap grpmaps[numsamples]; // 48 * 96 = 4608 bytes!
+	I32gimap grpmaps[numsamples];
 	size_t cnt = 0; // count samples
 	q.getln(sqlcmd);
 	while(cnt < numsamples) { // for each sample [1, 96]
@@ -100,6 +96,7 @@ int main(int argc, char **argv) {
 				pairsque.push(getidfr(mutln));
 			}
 		}
+		// printmap(grpmaps[cnt-1], 2);
 	}
 	return EXIT_SUCCESS;
 }

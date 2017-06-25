@@ -9,7 +9,8 @@
 using namespace std;
 
 class GrpInfo {
-	typedef struct { // 6 bytes
+	typedef struct {
+
 		/*
 		 * pos: mitomap position of the mutation
 		 * type: type of mutation // aka is it a G to A, A to C, C to :
@@ -28,7 +29,9 @@ class GrpInfo {
 
 	typedef vector<Mutation> Mutvec;
 	struct MutvecDeleter {
-		void operator()(Mutvec *mv) { delete(mv); }
+		void operator()(Mutvec *mv) {
+			delete(mv); 
+		}
 	};
 	typedef unique_ptr<Mutvec, MutvecDeleter> Mptr;
 
@@ -62,17 +65,19 @@ public:
 
 	GrpInfo();
 	GrpInfo(const uint32_t, string) throw(GrpError);
+	void update(const int[]);
 	uint32_t *getgrpid();
 	string *getgrcon();
-	int getmutnum();
-	void update(const int[]);
+	size_t getmutnum();
 	string muttostring(const Mutation &) const;
 	string grptostring() const;
 	void print() const;
 };
 
 struct GrpInfoDeleter {
-	void operator()(GrpInfo *gi) { delete(gi); }
+	void operator()(GrpInfo *gi) {
+		delete(gi);
+	}
 };
 
 #endif /* GRPINFO_H */

@@ -3,7 +3,10 @@
 
 #include "grpinfo.h"
 #include <map>
+#include <iostream>
 #include <sstream>
+#include <iterator>
+#include <cassert>
 using namespace std;
 
 typedef map<uint8_t, string> I8strmap;
@@ -38,6 +41,22 @@ inline pair<int, int> getidfr(const string &ln)
 	int grpid, freq;
 	ss >> grpid >> freq;
 	return make_pair(grpid, freq);
+}
+
+void printmap(I32gimap &map, size_t cutoff)
+{
+	I32gimap::iterator it = map.begin();
+	cout << "grpid" << "\t" << "#memb" << "\t" << "het" << "\t" << "som" << "\t" << "#mut(subst only) " 
+		<< "[freq|pos|mut_type|is_subst|is_hetero]"<< endl;
+	while (it != map.end()) {
+		uint32_t id1 = it->first;
+		uint32_t id2 = *it->second->getgrpid();
+		assert(id1 == id2);
+		if(it->second->getmutnum() >= cutoff)
+			it->second->print();
+		it++;
+	}
+	cout << endl;
 }
 
 #endif /* FILTERS_H */
