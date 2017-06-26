@@ -11,15 +11,14 @@ TESTDIR = $(CURDIR)/unittest
 INC = -I$(CURDIR)
 
 BIN = filters
-OBJ = grpinfo.o
+OBJ = grpinfo.o \
+	$(IODIR)/inputfile.o \
+	$(DBDIR)/db.o
 
-RPATH = -Wl,-rpath=$(DBDIR) -L$(DBDIR) -Wl,-rpath=$(IODIR) -L$(IODIR) 
-RLIBS = -ldb -linputfile
-
-all: db io $(BIN) db
+all: $(BIN)
 
 $(BIN): $(OBJ) filters.o
-	$(CXX) $(OBJ) filters.o  -o $(BIN) $(RPATH) $(LIBS) $(RLIBS)
+	$(CXX) $(OBJ) filters.o  -o $(BIN) $(LIBS)
 
 .cpp.o:
 	$(CXX) $(FLAGS) $(CFLAGS) -c -o $@ $<
