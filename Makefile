@@ -1,6 +1,6 @@
 CXX = g++
 FLAGS = -std=c++11
-CFLAGS = -g -Wall -fPIC
+CFLAGS = -g -Wall
 LIBS = -lsqlite3
 
 FILEPATH := $(realpath $(lastword $(MAKEFILE_LIST)))
@@ -18,12 +18,6 @@ RLIBS = -ldb -linputfile
 
 all: db io $(BIN) db
 
-db: $(DBDIR)/db.o
-	$(CXX) -shared -o $(DBDIR)/libdb.so $(DBDIR)/db.o 
-
-io: $(IODIR)/inputfile.o
-	$(CXX) -shared -o $(IODIR)/libinputfile.so $(IODIR)/inputfile.o 
-
 $(BIN): $(OBJ) filters.o
 	$(CXX) $(OBJ) filters.o  -o $(BIN) $(RPATH) $(LIBS) $(RLIBS)
 
@@ -31,7 +25,7 @@ $(BIN): $(OBJ) filters.o
 	$(CXX) $(FLAGS) $(CFLAGS) -c -o $@ $<
 
 clean:
-	rm -f $(OBJ) $(BIN) *.o */*.o $(TESTDIR)/*.catch
+	rm -f $(OBJ) $(BIN) *.o $(TESTDIR)/*.catch
 
 catch: $(patsubst $(TESTDIR)/%.cpp, $(TESTDIR)/%.catch, $(wildcard $(TESTDIR)/*.cpp))
 
